@@ -77,3 +77,49 @@ export const updateBook = async(req,res) => {
         res.status(500).json({success:false, message: error.message});
     }
 };
+
+export const getBookByGenre = async (req,res)=>{
+    try{
+        const bookGenre = await Books.aggregate({
+            $group: {
+                _id:"$genre",
+                image: {$first: "$image"}
+            }
+        });
+        res.json({success:true, genre: bookGenre});
+    }
+    catch(error)
+    {
+        res.status(500).json({success:false, message:error.message});
+    }
+};
+
+export const getBookByAuthor = async(req,res) =>{
+    try{
+            const bookAuthor = await Books.aggregate({
+                $group:{
+                    _id:"$author",
+                }
+            })
+            res.json({success: true, author: bookAuthor});
+    }
+    catch(error)
+    {
+        res.status(500).json({success: false,message: error.message});
+    }
+};
+
+export const getBookByYear = async(req,res) =>{
+    try{
+        const getbookbyYear = await Books.aggregate({
+            $group:{
+                _id:"$publishedYear",
+            }
+        })
+        res.json({success:true, message: getBookByYear});
+    }
+    catch(error)
+    {
+        res.status(500).json({success: false, message: error.message});
+    }
+};
