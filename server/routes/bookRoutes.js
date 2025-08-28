@@ -9,7 +9,7 @@ router.get('/getbook',getBook);
 router.get('/getBookById/:id',getBookById);
 router.put('/updateBook/:id',updateBook);
 router.get('/genre',getBookByGenre);
-router.get('/author',getBookByAuthor);
+router.get('/author/:author',getBookByAuthor);
 router.get('/year',getBookByYear);
 
 export default router;

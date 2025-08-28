@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
 
+  const backendUrl =import.meta.env.VITE_BACKEND_URL
   const [books, setBooks] = useState([]);
   const [error, setError] = useState(null);
   const [genre, setGenre] = useState([]);
@@ -13,7 +14,7 @@ const Home = () => {
   useEffect(()=>{
     const fetchBooks = async() =>{
       try{
-        const response = await fetch("http://localhost:5000/api/book/getbook");
+        const response = await fetch(backendUrl + "/api/book/getbook");
         if(!response.ok)
         {
             throw new Error("failed to fetch books");
@@ -38,7 +39,7 @@ const Home = () => {
   useEffect(()=>{
      const fetchGenre = async()=>{
           try{
-              const response = await fetch("http://localhost:5000/api/book/genre");
+              const response = await fetch(backendUrl + "/api/book/genre");
               if(!response.ok)
               {
                 throw new Error("Can't fetch from API");
@@ -90,7 +91,7 @@ const Home = () => {
               <img className='w-50 h-50' src={book.image}/>
               <h2>{book.title}</h2>
               <h4>{book.genre.join(" & ")}</h4>
-              <button onClick={()=>navigate(`/${book._id}`)}className='cursor-pointer px-6 py-1 rounded bg-gray-600 text-white hover:bg-gray-700'>view</button>
+              <button onClick={()=>navigate(`/book/${book._id}`)}className='cursor-pointer px-6 py-1 rounded bg-gray-600 text-white hover:bg-gray-700'>view</button>
             </div>
           ))}
       </div>

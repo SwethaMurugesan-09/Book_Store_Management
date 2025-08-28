@@ -2,7 +2,7 @@ import Books from "../models/Books.js";
 import {v2 as cloudinary} from 'cloudinary';
 
 export const addBook = async(req,res) =>{
-    const {title, author, genre, description, publishedYear, rating} =req.body;
+    const {title, author, genre, description, publishedYear, rating, bookType} =req.body;
     const image = req.file
 
     if(!title || !author || !genre || !publishedYear || !image){
@@ -17,7 +17,8 @@ export const addBook = async(req,res) =>{
             description,
             publishedYear,
             image: imageUpload.secure_url,
-            rating
+            rating,
+            bookType,
         })
         await newBook.save()
         res.json({success:true, newBook})
@@ -80,12 +81,13 @@ export const updateBook = async(req,res) => {
 
 export const getBookByGenre = async (req,res)=>{
     try{
-        const bookGenre = await Books.aggregate({
+        const bookGenre = await Books.aggregate([{
             $group: {
                 _id:"$genre",
                 image: {$first: "$image"}
             }
-        });
+        }
+        ]);
         res.json({success:true, genre: bookGenre});
     }
     catch(error)
@@ -96,12 +98,10 @@ export const getBookByGenre = async (req,res)=>{
 
 export const getBookByAuthor = async(req,res) =>{
     try{
-            const bookAuthor = await Books.aggregate({
-                $group:{
-                    _id:"$author",
-                }
-            })
-            res.json({success: true, author: bookAuthor});
+            const {author} = req.params;
+            const books = await Books.find({author: { $regex: new RegExp(author, "i")}
+        });
+            res.json({success: true, books});
     }
     catch(error)
     {
@@ -109,13 +109,14 @@ export const getBookByAuthor = async(req,res) =>{
     }
 };
 
+
 export const getBookByYear = async(req,res) =>{
     try{
-        const getbookbyYear = await Books.aggregate({
+        const getbookbyYear = await Books.aggregate([{
             $group:{
                 _id:"$publishedYear",
             }
-        })
+        }])
         res.json({success:true, message: getBookByYear});
     }
     catch(error)

@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const BookDetail = () => {
 
     const {id} = useParams();
+    const backendUrl =import.meta.env.VITE_BACKEND_URL
 
+    const navigate = useNavigate();
     const [book, setBooks] =useState([]);
     const [error, setError] = useState(null);
+    const [authorBooks, setAuthorBooks] = useState([]);
 
     useEffect(()=>{
         const fetchBook = async ()=>{
             try{
-                const response = await fetch(`http://localhost:5000/api/book/getBookById/${id}`);
+                const response = await fetch(backendUrl + `/api/book/getBookById/${id}`);
                 if(!response.ok)
                 {
                     throw new Error("Can't fetch from API");
@@ -32,30 +35,31 @@ const BookDetail = () => {
         fetchBook();
     },[id])
 
-    
+
   useEffect(()=>{
-       const fetchGenre = async()=>{
+       const fetchAuthorBook = async()=>{      
+        if (!book?.author) return;
             try{
-                const response = await fetch("http://localhost:5000/api/book/author");
+                const response = await fetch(backendUrl + `/api/book/author/${encodeURIComponent(book.author)}`);
                 if(!response.ok)
                 {
-                  throw new Error("Can't fetch from API");
+                  throw new Error("Can't fetch books by Author");
                 }
                 const data = await response.json();
-                if(data.genre)
+                if(data.books)
                 {
-                    setGenre(data.genre);
+                    setAuthorBooks(data.books.filter((b) => b._id!==id));
                 }
                 else{
-                  setGenre([]);
+                  setAuthorBooks([]);
                 }
             }catch(err)
             {
               setError(err.message);
             }
        };
-       fetchGenre();
-    },[])
+       fetchAuthorBook();
+    },[book, id]);
   
 
 
@@ -66,6 +70,7 @@ const BookDetail = () => {
             <div>
                 <img src={book.image}/>
                 <div>{book.bookType}</div>
+                <button>Add to WishList</button>
             </div>
             <div>
                 <h2>Author: {book.author}</h2>
@@ -78,7 +83,16 @@ const BookDetail = () => {
 
         {/* Book by authors */}
         <div>
-            <h1>Browse By Authors</h1>
+            <h1>More books by {book.author}</h1>
+            <div>
+                {authorBooks.map((b)=>(
+                    <div>
+                        <img src={b.image}/>
+                        <h2>Genre: {b.genre}</h2>
+                        <button onClick={()=>navigate(`/book/${b._id}`)}>view</button>
+                    </div>
+                ))}
+            </div>
         </div>
     </div>
   )
