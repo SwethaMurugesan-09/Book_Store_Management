@@ -3,12 +3,16 @@ import {v2 as cloudinary} from 'cloudinary';
 
 export const addBook = async(req,res) =>{
     const {title, author, genre, description, publishedYear, rating, bookType} =req.body;
-    const image = req.file
-
-    if(!title || !author || !genre || !publishedYear || !image){
+    const image = req.files?.image?.[0];
+    const uploadBook = req.files?.uploadBook[0];
+    if(!title || !author || !genre || !publishedYear || !image || !uploadBook){
         return res.json({success: false, message: "Missing details"})
     }
     try{
+
+        const bookUpload = await cloudinary.uploader.upload(uploadBook.path,{
+            resource_type: "raw",
+        })
         const imageUpload = await cloudinary.uploader.upload(image.path)
         const newBook = new Books({
             title,
@@ -19,6 +23,7 @@ export const addBook = async(req,res) =>{
             image: imageUpload.secure_url,
             rating,
             bookType,
+            uploadBook: bookUpload.secure_url,
         })
         await newBook.save()
         res.json({success:true, newBook})

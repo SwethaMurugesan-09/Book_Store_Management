@@ -4,7 +4,7 @@ import {addBook, getBook, getBookByAuthor, getBookByGenre, getBookById, getBookB
 
 const router = express.Router()
 
-router.post('/add-books',upload.single('image'),addBook);
+router.post('/add-books',upload.fields([{name: 'image', maxCount: 1},{name: 'uploadBook', maxCount:1},]),addBook);
 router.get('/getbook',getBook);
 router.get('/getBookById/:id',getBookById);
 router.put('/updateBook/:id',updateBook);

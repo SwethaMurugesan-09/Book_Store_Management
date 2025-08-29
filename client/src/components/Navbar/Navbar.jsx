@@ -14,7 +14,7 @@ const Navbar = () => {
           <p className='px-3 cursor-pointer'>Classic Reads</p>
         </div>
         <div className='flex justify-between items-center'>
-          <button className='px-2 cursor-pointer'>Wishlist</button>
+          <button className='px-2 cursor-pointer' onClick={()=> navigate("/wishlist")}>Wishlist</button>
           <h1>|</h1>
           <button className='px-2 cursor-pointer' onClick={()=> navigate("/login")}>login</button>
         </div>
