@@ -34,13 +34,13 @@ export const loginUser = async(req,res) =>{
         const user = await Users.findOne({email});
         if(!user)
         {
-            return res.send(400).json({message:'Invalid email'});
+            return res.status(400).json({message:'Invalid email'});
         }
 
-        const isMacth = await bcrypt.compare(password,user.password);
-        if(!isMacth)
+        const isMatch = await bcrypt.compare(password,user.password);
+        if(!isMatch)
         {
-            return res.send(400).json({message:'Invalid password'});
+            return res.status(400).json({message:'Invalid password'});
         }
 
         const token = jwt.sign({userId: user._id},process.env.JWT_SECRET,{expiresIn: '12h'});
