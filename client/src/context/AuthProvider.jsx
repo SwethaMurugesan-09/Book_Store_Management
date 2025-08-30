@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('auth-token');
+    console.log("Token found in storage:", token);
     if (token) {
       setIsAuthenticated(true);
     }
@@ -25,6 +26,46 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
 
+
+  const fetchUserData = async () => {
+    const token = localStorage.getItem('auth-token');
+    if (!token) {
+      setIsLoadingAuth(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${backendUrl}/api/user/profile`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setIsAuthenticated(true);
+        setEmail(data.user.email);
+        setUserId(data.user._id);
+        console.log("User data loaded:", data);
+      } else {
+        console.warn("Invalid token or session expired");
+        localStorage.removeItem('auth-token');
+        setIsAuthenticated(false);
+      }
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      localStorage.removeItem('auth-token');
+      setIsAuthenticated(false);
+    }
+    setIsLoadingAuth(false);
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  
 const login = async (email, password) => {
     try {
       const response = await fetch(`${backendUrl}/api/user/login`, {
@@ -33,9 +74,10 @@ const login = async (email, password) => {
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
-
+      console.log("Login Response:", data); 
       if (response.ok) {
         localStorage.setItem("auth-token", data.token);
+         console.log("Stored token:", data.token); 
         setIsAuthenticated(true);
         setEmail(data.user.email);
         setUserId(data.user._id);

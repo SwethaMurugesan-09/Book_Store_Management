@@ -39,7 +39,7 @@ const Home = () => {
   useEffect(()=>{
      const fetchGenre = async()=>{
           try{
-              const response = await fetch(backendUrl + "/api/book/genre");
+              const response = await fetch(backendUrl + "/api/book/genres");
               if(!response.ok)
               {
                 throw new Error("Can't fetch from API");
@@ -101,7 +101,7 @@ const Home = () => {
         <div className='px-15 grid grid-cols-5 gap-6  items-center'>
           { genre.length > 0 ? (
             genre.map((genre, index)=>(
-              <span className='px-10' key ={index} >
+              <span className='px-10' key ={index} onClick={() => navigate(`/genre/${genre._id}`)}>
                 <img className='w-50 h-50' src={genre.image}/>
                 <p className=''>{genre._id}</p>
               </span>

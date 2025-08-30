@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: [6, 'Password is invalid'],
     },
+    wishList:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Books',
+        default: [],
+    }],
 }, {
         timestamps:true,
     });

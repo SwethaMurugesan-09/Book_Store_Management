@@ -1,141 +1,137 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthProvider";
 
 const BookDetail = () => {
-    const { id } = useParams();
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const { id } = useParams();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const { userId, isAuthenticated } = useAuth();
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [book, setBook] = useState(null);
+  const [error, setError] = useState(null);
+  const [authorBooks, setAuthorBooks] = useState([]);
+  const [pdfError, setPdfError] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    const [book, setBook] = useState(null);  
-    const [error, setError] = useState(null);
-    const [authorBooks, setAuthorBooks] = useState([]);
-    const [numPages, setNumPages] = useState(null);
-    const [pdfError, setPdfError] = useState(false);
-    const [loading, setLoading] = useState(true); 
-
-    useEffect(() => {
-        const fetchBook = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch(backendUrl + `/api/book/getBookById/${id}`);
-                if (!response.ok) {
-                    throw new Error("Can't fetch from API");
-                }
-                const data = await response.json();
-                if (data.book) {
-                    setBook(data.book);
-                } else {
-                    setBook(null);
-                }
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchBook();
-    }, [id]);
-
-    useEffect(() => {
-        const fetchAuthorBook = async () => {
-            if (!book?.author) return;
-            try {
-                const response = await fetch(backendUrl + `/api/book/author/${encodeURIComponent(book.author)}`);
-                if (!response.ok) {
-                    throw new Error("Can't fetch books by Author");
-                }
-                const data = await response.json();
-                if (data.books) {
-                    setAuthorBooks(data.books.filter((b) => b._id !== id));
-                } else {
-                    setAuthorBooks([]);
-                }
-            } catch (err) {
-                setError(err.message);
-            }
-        };
-        fetchAuthorBook();
-    }, [book, id]);
-
-    const checkPdfAccess = async () => {
-        try {
-            const response = await fetch(book.uploadBook, { method: 'HEAD' });
-            if (!response.ok) {
-                setPdfError(true);
-                console.error('PDF not accessible:', response.status);
-            }
-        } catch (error) {
-            setPdfError(true);
-            console.error('PDF access error:', error);
-        }
+  useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${backendUrl}/api/book/getBookById/${id}`);
+        if (!res.ok) throw new Error("Can't fetch book");
+        const data = await res.json();
+        setBook(data.book || null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchBook();
+  }, [id]);
 
-    useEffect(() => {
-        if (book?.uploadBook) {
-            checkPdfAccess();
-        }
-    }, [book]);
+  useEffect(() => {
+    const fetchAuthorBooks = async () => {
+      if (!book?.author) return;
+      try {
+        const res = await fetch(`${backendUrl}/api/book/author/${encodeURIComponent(book.author)}`);
+        if (!res.ok) throw new Error("Can't fetch author's books");
+        const data = await res.json();
+        setAuthorBooks(data.books.filter((b) => b._id !== id));
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    fetchAuthorBooks();
+  }, [book, id]);
 
-    if (loading) return <div className="p-4">Loading book details...</div>;
-    if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
-    if (!book) return <div className="p-4">Book not found</div>;
+  useEffect(() => {
+    const checkPdfAccess = async () => {
+      if (!book?.uploadBook) return;
+      try {
+        const res = await fetch(book.uploadBook, { method: 'HEAD' });
+        if (!res.ok) setPdfError(true);
+      } catch {
+        setPdfError(true);
+      }
+    };
+    checkPdfAccess();
+  }, [book]);
 
-    return (
+  const handleAddToWishlist = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please login first");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${backendUrl}/api/user/wishlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("auth-token")}`,
+        },
+        body: JSON.stringify({ userId, bookId: book._id }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message);
+      } else {
+        toast.error(data.message || "Failed to add to wishlist");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  if (loading) return <div className="p-4">Loading book...</div>;
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  if (!book) return <div className="p-4">Book not found</div>;
+
+  return (
+    <div>
+      <div className="flex flex-cols gap-6">
+        <h1>{book.title}</h1>
         <div>
-            <div className='flex flex-cols gap-6'>
-                <h1>{book.title}</h1>
-                <div>
-                    <img src={book.image} alt={book.title} />
-                    <div>
-                        <h2>{book.bookType}:</h2>
-
-                        {book.uploadBook ? (
-                            <div className="">
-                                {pdfError ? (
-                                    <div>
-                                        <p className="text-red-500 mb-4">PDF file is not accessible</p>
-                                        <p className="">URL: {book.uploadBook}</p>
-                                    </div>
-                                ) : (
-                                    <div className="text-center">
-                                        <div>
-                                            <a
-                                                href={book.uploadBook}
-                                                download={`${book.title}.pdf`}>Download PDF
-                                            </a>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ) : null}
-                    </div>
-                    <button>Add to WishList</button>
-                </div>
-                <div>
-                    <h2>Author: {book.author}</h2>
-                    <h2>Genre: {book.genre}</h2>
-                    <h2>Published_Year: {book.publishedYear}</h2>
-                    <h2>Rating: {book.rating} </h2>
-                    <div>Description: {book.description} </div>
-                </div>
-            </div>
-
-            {/* Book by authors */}
-            <div>
-                <h1>More books by {book.author}</h1>
-                <div>
-                    {authorBooks.map((b) => (
-                        <div key={b._id}>
-                            <img src={b.image} alt={b.title} />
-                            <h2>Genre: {b.genre}</h2>
-                            <button onClick={() => navigate(`/book/${b._id}`)}>view</button>
-                        </div>
-                    ))}
-                </div>
-            </div>
+          <img src={book.image} alt={book.title} />
+          {book.uploadBook && !pdfError && (
+            <a href={book.uploadBook} download={`${book.title}.pdf`} className="block mt-2 text-blue-600">
+              Download PDF
+            </a>
+          )}
+          {pdfError && <p className="text-red-500">PDF not accessible</p>}
+          <button onClick={handleAddToWishlist} className="bg-blue-600 text-white px-4 py-2 mt-3 rounded">
+            Add to Wishlist
+          </button>
         </div>
-    )
-}
+        <div>
+          <h2>Author: {book.author}</h2>
+          <h2>Genre: {book.genre}</h2>
+          <h2>Published Year: {book.publishedYear}</h2>
+          <h2>Rating: {book.rating}</h2>
+          <p>{book.description}</p>
+        </div>
+      </div>
 
-export default BookDetail
+      {/* Author books */}
+      <div className="mt-6">
+        <h1>More books by {book.author}</h1>
+        <div>
+          {authorBooks.map((b) => (
+            <div key={b._id}>
+              <img src={b.image} alt={b.title} />
+              <button onClick={() => navigate(`/book/${b._id}`)}>View</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BookDetail;

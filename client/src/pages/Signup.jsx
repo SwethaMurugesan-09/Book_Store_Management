@@ -31,6 +31,7 @@ const Signup = () => {
       if (response.ok) {
         alert('User registered successfully!');
         console.log("Registered user:", data);
+         navigate('/login');
       } else {
         alert(data.message || 'Registration failed');
       }
@@ -45,24 +46,25 @@ const Signup = () => {
                <div>
                 <label htmlFor='email' className=''>Email: </label>
                 <input type='email' placeholder='Enter you email' id='email' value={email}
-                  onChange={(e) => setEmail(e.target.value)} />
+                  onChange={(e) => setEmail(e.target.value)} required />
               </div>
                <div>
                 <label htmlFor='text' className=''>Username: </label>
                 <input type='text' placeholder='Enter you name' id='name' value={username}
-                  onChange={(e) => setUsername(e.target.value)} />
+                  onChange={(e) => setUsername(e.target.value)} required />
               </div>
               <div>
                 <label htmlFor='password' className=''>Password:</label>
                 <input type='password' placeholder='Enter your password' id= 'password' value = {password}
-                  onChange={(e) => setPassword(e.target.value)} />
+                  onChange={(e) => setPassword(e.target.value)} required minLength={6} />
               </div>
               <div>
                 <label htmlFor='number' className=''>Phone Number:</label>
                 <input type='text' placeholder='Enter your number' id= 'number' value = {number}
-                  onChange={(e) => setNumber(e.target.value)} />
+                  onChange={(e) => setNumber(e.target.value)} required
+                  pattern='^\d{10}$'/>
               </div>
-              <button onClick={() =>handleSignup()}>Register</button>
+              <button type="submit">Register</button>
               <div>Already have an account?<span className='cursor-pointer' onClick={()=>navigate("/login")}>Login</span></div>
           </form>
         </div>

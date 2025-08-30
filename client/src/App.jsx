@@ -7,6 +7,7 @@ import BookDetail from './pages/BookDetail'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import WishList from './pages/WishList'
+import BookByGenre from './pages/BookByGenre'
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
         <Route path = "/login" element={<Login/>}/>
         <Route path= '/register' element={<Signup/>}/>
         <Route path='/wishlist' element={<WishList/>}/>
+        <Route path="/genre/:genre" element={<BookByGenre/>} />
       </Routes>
     </>
   )

@@ -86,6 +86,19 @@ export const updateBook = async(req,res) => {
 
 export const getBookByGenre = async (req,res)=>{
     try{
+            const {genre} = req.params;
+            const books = await Books.find({ genre: genre });
+            res.json({success: true, books});
+    }
+    catch(error)
+    {
+        res.status(500).json({success:false, message:error.message});
+    }
+};
+
+
+export const getAllGenres = async (req, res) => {
+  try{
         const bookGenre = await Books.aggregate([{
             $group: {
                 _id:"$genre",
@@ -94,12 +107,11 @@ export const getBookByGenre = async (req,res)=>{
         }
         ]);
         res.json({success:true, genre: bookGenre});
-    }
-    catch(error)
-    {
-        res.status(500).json({success:false, message:error.message});
-    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
+
 
 export const getBookByAuthor = async(req,res) =>{
     try{
