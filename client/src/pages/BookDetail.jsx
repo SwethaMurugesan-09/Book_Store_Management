@@ -14,6 +14,7 @@ const BookDetail = () => {
   const [authorBooks, setAuthorBooks] = useState([]);
   const [pdfError, setPdfError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(""); 
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -89,14 +90,26 @@ const BookDetail = () => {
     }
   };
 
+    const filteredBooks = authorBooks.filter((b) => {
+      const query = searchQuery.toLowerCase();
+      const title = String(b.title || "").toLowerCase();
+      const year = String(b.publishedYear || "").toLowerCase();
+
+      return title.includes(query) || year.includes(query);
+    });
+
+
   if (loading) return <div className="p-4">Loading book...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
   if (!book) return <div className="p-4">Book not found</div>;
 
   return (
     <div>
+      <h1>{book.title}</h1>
+      <input className="px-4 flex-grow p-2 outline-none text-black"
+        type="text" value={searchQuery}  onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search book by title or genre or author or year"/>
       <div className="flex flex-cols gap-6">
-        <h1>{book.title}</h1>
         <div>
           <img src={book.image} alt={book.title} />
           {book.uploadBook && !pdfError && (
@@ -122,9 +135,10 @@ const BookDetail = () => {
       <div className="mt-6">
         <h1>More books by {book.author}</h1>
         <div>
-          {authorBooks.map((b) => (
+          {filteredBooks.map((b) => (
             <div key={b._id}>
               <img src={b.image} alt={b.title} />
+              <p>{b.title} ({b.publishedYear})</p>
               <button onClick={() => navigate(`/book/${b._id}`)}>View</button>
             </div>
           ))}

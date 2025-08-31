@@ -8,6 +8,8 @@ const BookByGenre = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [books, setBooks] = useState([]);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); 
+  
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -25,16 +27,30 @@ const BookByGenre = () => {
     fetchBooks();
   }, [genre, backendUrl]);
 
+   const filteredBooks = books.filter((book) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      book.title.toLowerCase().includes(query) ||
+      book.genre.some((g) => g.toLowerCase().includes(query))
+    );
+  });
+
+
   return (
     <div className="p-6">
       <h1 className=''>
         Books in "{genre}" Genre
       </h1>
+      <input
+            className="px-4 flex-grow p-2 outline-none text-black"
+            type="text" value={searchQuery}  onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search book by title or genre"
+          />
       {error && <p className="text-red-500">{error}</p>}
-      {books.length === 0 && !error && <p>No books found for this genre.</p>}
+      {filteredBooks.length === 0 && !error && <p>No books found for this genre.</p>}
       
       <div className="grid grid-cols-5 gap-6">
-        {books.map((book) => (
+        {filteredBooks.map((book) => (
           <div key={book._id} className="p-4 border rounded-lg shadow hover:shadow-lg">
             <img 
               src={book.image} 

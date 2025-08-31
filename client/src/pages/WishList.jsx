@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthProvider";
 import { toast } from "react-toastify";
-
+import emptycart from '../assets/emptycart.png';
 const WishList = () => {
   const { userId, isAuthenticated } = useAuth();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -52,9 +52,9 @@ const WishList = () => {
       const data = await response.json();
       if (response.ok) {
         setWishlist((prev) => prev.filter((item) => item._id !== bookId));
-        toast.success(data.message);
+        toast.error(data?.message || "Book removed from wishlist!");
       } else {
-        toast.error(data.message);
+        toast.error(data?.message || "Failed to remove book");
       }
     } catch (error) {
       toast.error("Error removing book");
@@ -66,32 +66,35 @@ const WishList = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Your Wishlist</h1>
       {wishlist.length === 0 ? (
-        <p>No books in wishlist</p>
+        <div>
+        <p className="text-4xl font-medium text-center pt-10 text-blue-950">No books in wishlist</p>
+        <img className='mx-auto w-180 h-110' src={emptycart} />
+        </div>
       ) : (
-        <div className="grid grid-cols-4 gap-6">
+        <div>
+          <h1 className='text-3xl font-medium text-center pb-10 text-blue-950'>Your Cart</h1>
+        <div className="grid grid-cols-4 gap-6 pb-5">
           {wishlist.map((item) => (
-            <div key={item._id} className="p-4 border rounded-lg shadow">
-              <img src={item.image} alt={item.title} className="w-full h-48 object-cover mb-4 rounded" />
+            <div key={item._id} className="p-4 w-75 rounded-lg shadow-sm">
+              <img src={item.image} alt={item.title} className="w-65 h-55 object-cover mb-4 rounded" />
               <h2 className="text-lg font-semibold">{item.title}</h2>
               <p className="text-sm text-gray-600">{item.author}</p>
               <div className="mt-4 flex justify-between">
-                <button
-                  onClick={() => window.location.href = `/book/${item._id}`}
-                  className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  View
-                </button>
+                <div className="px-4 py-1 bg-gray-600 cursor-pointer text-white rounded hover:bg-gray-700"
+                  onClick={() => window.location.href = `/book/${item._id}`}>
+                  view
+                </div>
                 <button
                   onClick={() => handleRemove(item._id)}
-                  className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                className="text-gray-800 text-xl font-bold cursor-pointer"
                 >
                   Remove
                 </button>
               </div>
             </div>
           ))}
+        </div>
         </div>
       )}
     </div>

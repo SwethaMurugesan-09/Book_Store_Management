@@ -8,12 +8,15 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import WishList from './pages/WishList'
 import BookByGenre from './pages/BookByGenre'
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
 
   return (
     <>
       <Navbar/>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         <Route path="/" element={<Home/>} />
         <Route path="/book/:id" element={<BookDetail/>}/>
