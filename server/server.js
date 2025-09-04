@@ -11,15 +11,21 @@ import { Socket } from 'socket.io';
 const app= express();
 
 const allowedOrigins = [
-    'http://localhost:3000', 
-    'https://roofings-server.vercel.app'
-  ];
-  
-  const corsOptions = {
-      origin: "*", 
-      methods: "GET,POST,PUT,DELETE",
-      allowedHeaders: "Content-Type,Authorization"
-  };
+  "http://localhost:5173", // local dev
+  "https://classic-reads-bay.vercel.app" // actual deployed client URL
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: "Content-Type,Authorization"
+};
 
 app.use(cors(corsOptions));
 app.use(express.json());
