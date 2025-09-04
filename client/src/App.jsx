@@ -10,6 +10,8 @@ import WishList from './pages/WishList'
 import BookByGenre from './pages/BookByGenre'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Chat from './components/Chat/Chat'
+import Join from './components/Join/Join'
 
 function App() {
 
@@ -24,6 +26,8 @@ function App() {
         <Route path= '/register' element={<Signup/>}/>
         <Route path='/wishlist' element={<WishList/>}/>
         <Route path="/genre/:genre" element={<BookByGenre/>} />
+        <Route path='/chat' element={<Chat/>}/>
+        <Route path='/join' element={<Join/>}/>
       </Routes>
     </>
   )

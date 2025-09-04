@@ -5,6 +5,9 @@ import 'dotenv/config'
 import userRoutes from './routes/userRoutes.js';
 import bookRoutes from './routes/bookRoutes.js';
 import connectCloudinary from './config/cloudinary.js';
+import { Socket } from 'socket.io';
+
+
 const app= express();
 
 app.use(cors());
